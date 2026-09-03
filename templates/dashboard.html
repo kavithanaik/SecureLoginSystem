@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Dashboard</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+<body>
+
+<div class="dashboard-container">
+
+    <div class="dashboard-card">
+
+        <h1>
+            Welcome, {{ user["name"] }}
+        </h1>
+
+        <p class="dashboard-subtitle">
+            You are securely logged in to your account.
+        </p>
+
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+
+            {% for category, message in messages %}
+
+                <div class="message {{ category }}">
+                    {{ message }}
+                </div>
+
+            {% endfor %}
+
+        {% endwith %}
+
+
+        <div class="account-box">
+
+            <p class="twofa-status">
+
+                <strong>
+                    Two-Factor Authentication:
+                </strong>
+
+                {% if user["two_fa_enabled"] %}
+
+                    <span class="enabled">
+                        Enabled
+                    </span>
+
+                {% else %}
+
+                    <span>
+                        Available
+                    </span>
+
+                {% endif %}
+
+            </p>
+
+
+            <h2>
+                Account Information
+            </h2>
+
+
+            <p>
+                <strong>Name:</strong>
+                {{ user["name"] }}
+            </p>
+
+
+            <p>
+                <strong>Email:</strong>
+                {{ user["email"] }}
+            </p>
+
+
+            <p>
+                <strong>Status:</strong>
+
+                <span class="enabled">
+                    Authenticated
+                </span>
+
+            </p>
+
+        </div>
+
+
+        {% if not user["two_fa_enabled"] %}
+
+            <a
+                href="{{ url_for('setup_2fa') }}"
+                class="primary-btn button-link"
+            >
+                Setup Two-Factor Authentication
+            </a>
+
+        {% else %}
+
+            <div class="twofa-enabled-box">
+
+                ✓ Two-Factor Authentication is enabled
+
+            </div>
+
+        {% endif %}
+
+
+        <br>
+
+
+        <a
+            href="{{ url_for('logout') }}"
+            class="logout-btn"
+        >
+            Logout
+        </a>
+
+    </div>
+
+</div>
+
+</body>
+</html>

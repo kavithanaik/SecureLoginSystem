@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Verify 2FA | Secure Login System</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+</head>
+
+<body>
+
+    <div class="page-container">
+
+        <div class="twofa-card">
+
+            <!-- Lock Icon -->
+            <div class="twofa-icon">
+                🔐
+            </div>
+
+            <!-- Heading -->
+            <h1>
+                Verify 2FA
+            </h1>
+
+            <p class="twofa-description">
+                Enter the 6-digit code from your authenticator app.
+            </p>
+
+
+            <!-- QR CODE SECTION -->
+            <div class="qr-section">
+
+                <h2>
+                    2FA QR Code
+                </h2>
+
+                <div class="qr-box">
+
+                    <img
+                        src="{{ url_for('qr_code') }}"
+                        alt="2FA QR Code"
+                        class="qr-image"
+                    >
+
+                </div>
+
+                <p class="qr-instruction">
+                    You can scan this QR code with your
+                    authenticator app.
+                </p>
+
+                <p class="qr-apps">
+                    Google Authenticator • Microsoft Authenticator • Authy
+                </p>
+
+            </div>
+
+
+            <!-- DIVIDER -->
+            <div class="divider">
+                <span>ENTER CODE</span>
+            </div>
+
+
+            <!-- OTP FORM -->
+            <form
+                method="POST"
+                action="{{ url_for('verify_2fa') }}"
+                class="otp-form"
+            >
+
+                <label for="otp">
+                    Authentication Code
+                </label>
+
+                <input
+                    type="text"
+                    id="otp"
+                    name="otp"
+                    placeholder="000000"
+                    maxlength="6"
+                    minlength="6"
+                    pattern="[0-9]{6}"
+                    inputmode="numeric"
+                    autocomplete="one-time-code"
+                    required
+                >
+
+                <button
+                    type="submit"
+                    class="verify-button"
+                >
+                    🔓 Verify 2FA
+                </button>
+
+            </form>
+
+
+            <!-- BACK TO LOGIN -->
+            <a
+                href="{{ url_for('login') }}"
+                class="back-login"
+            >
+                ← Back to Login
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- OTP INPUT SCRIPT -->
+    <script>
+
+        const otpInput = document.getElementById("otp");
+
+        otpInput.addEventListener("input", function () {
+
+            this.value = this.value
+                .replace(/[^0-9]/g, "")
+                .slice(0, 6);
+
+        });
+
+    </script>
+
+</body>
+</html>

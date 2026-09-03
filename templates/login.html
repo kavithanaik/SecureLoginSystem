@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Secure Login</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<div class="auth-container">
+
+    <div class="auth-card">
+
+        <h1>Secure Login</h1>
+
+        <p class="subtitle">
+            Sign in to access your account
+        </p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+
+            {% for category, message in messages %}
+
+                <div class="message {{ category }}">
+                    {{ message }}
+                </div>
+
+            {% endfor %}
+
+        {% endwith %}
+
+
+        <form method="POST"
+              action="{{ url_for('login') }}">
+
+            <label>Email Address</label>
+
+            <input
+                type="email"
+                name="email"
+                placeholder="Enter your email"
+                required
+            >
+
+
+            <label>Password</label>
+
+            <div class="password-box">
+
+                <input
+                    type="password"
+                    id="loginPassword"
+                    name="password"
+                    placeholder="Enter your password"
+                    required
+                >
+
+                <button
+                    type="button"
+                    class="show-password"
+                    onclick="togglePassword('loginPassword', this)"
+                >
+                    Show
+                </button>
+
+            </div>
+
+
+            <button
+                type="submit"
+                class="primary-btn"
+            >
+                Login
+            </button>
+
+        </form>
+
+
+        <p class="bottom-text">
+
+            Don't have an account?
+
+            <a href="{{ url_for('register') }}">
+                Create Account
+            </a>
+
+        </p>
+
+    </div>
+
+</div>
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+
+</body>
+</html>

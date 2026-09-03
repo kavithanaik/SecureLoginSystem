@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Setup 2FA</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+
+</head>
+
+
+<body>
+
+<div class="auth-container">
+
+    <div class="auth-card twofa-card">
+
+
+        <!-- ICON -->
+
+        <div class="lock-icon">
+            🔐
+        </div>
+
+
+        <!-- TITLE -->
+
+        <h1>
+            Setup 2FA
+        </h1>
+
+
+        <p class="subtitle">
+            Secure your account using an authenticator app.
+        </p>
+
+
+        <!-- FLASH MESSAGE -->
+
+        {% with messages =
+            get_flashed_messages(with_categories=true)
+        %}
+
+            {% for category, message in messages %}
+
+                <div class="message {{ category }}">
+                    {{ message }}
+                </div>
+
+            {% endfor %}
+
+        {% endwith %}
+
+
+        <!-- INFORMATION -->
+
+        <div class="twofa-info">
+
+            <p>
+                <strong>Login successful.</strong>
+            </p>
+
+            <p>
+                Scan this QR code using
+                Google Authenticator,
+                Microsoft Authenticator,
+                Authy,
+                or another compatible
+                authenticator app.
+            </p>
+
+        </div>
+
+
+        <!-- QR CODE -->
+
+        <div class="qr-container">
+
+            <h2>
+                2FA QR Code
+            </h2>
+
+
+            <div class="qr-box">
+
+                <img
+                    src="{{ url_for('qr_code') }}"
+                    alt="2FA QR Code"
+                    class="qr-image"
+                >
+
+            </div>
+
+
+            <p class="qr-instruction">
+
+                Open your authenticator app,
+                select <strong>Scan QR Code</strong>,
+                and scan the code above.
+
+            </p>
+
+        </div>
+
+
+        <!-- MANUAL KEY -->
+
+        <div class="manual-section">
+
+            <h2>
+                Manual Setup Key
+            </h2>
+
+
+            <p>
+                If you cannot scan the QR code,
+                enter this key manually.
+            </p>
+
+
+            <div class="secret-key">
+
+                {{ secret }}
+
+            </div>
+
+        </div>
+
+
+        <!-- DIVIDER -->
+
+        <div class="divider">
+
+            <span>
+                VERIFY SETUP
+            </span>
+
+        </div>
+
+
+        <!-- OTP FORM -->
+
+        <form
+            method="POST"
+            action="{{ url_for('enable_2fa') }}"
+        >
+
+            <label for="otp">
+                Enter 6-Digit Code
+            </label>
+
+
+            <input
+                id="otp"
+                type="text"
+                name="otp"
+                maxlength="6"
+                minlength="6"
+                pattern="[0-9]{6}"
+                inputmode="numeric"
+                autocomplete="one-time-code"
+                placeholder="123456"
+                required
+                autofocus
+            >
+
+
+            <button
+                type="submit"
+                class="primary-btn"
+            >
+
+                🔒 Enable 2FA
+
+            </button>
+
+        </form>
+
+
+        <!-- BACK -->
+
+        <p class="bottom-text">
+
+            <a href="{{ url_for('dashboard') }}">
+
+                ← Back to Dashboard
+
+            </a>
+
+        </p>
+
+
+    </div>
+
+</div>
+
+</body>
+
+</html>
