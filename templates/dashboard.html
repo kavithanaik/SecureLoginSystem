@@ -99,12 +99,9 @@
 
         {% if not user["two_fa_enabled"] %}
 
-            <a
-                href="{{ url_for('setup_2fa') }}"
-                class="primary-btn button-link"
-            >
-                Setup Two-Factor Authentication
-            </a>
+            <a href="{{ url_for('setup_2fa') }}" class="setup-2fa-button">
+    🔐 Setup Two-Factor Authentication
+</a>
 
         {% else %}
 

@@ -1421,3 +1421,11 @@ input[name="otp"]:focus {
     background: #dbeafe;
     border: 1px solid #bfdbfe;
 }
+.setup-2fa-button {
+    display: inline-block;
+    padding: 9px 16px;
+    font-size: 13px;
+    width: auto;
+    min-width: 0;
+    border-radius: 7px;
+}
