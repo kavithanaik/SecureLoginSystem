@@ -663,31 +663,22 @@ def setup_2fa():
 @app.route("/qr-code")
 def qr_code():
 
-    user_id = session.get(
-        "user_id"
-    )
+    # Get logged-in user
+    user_id = session.get("user_id")
 
-
+    # If user is in the 2FA verification stage
     if not user_id:
+        user_id = session.get("pending_user_id")
 
-        user_id = session.get(
-            "pending_user_id"
-        )
-
-
+    # No user session
     if not user_id:
-
-        return (
-            "Unauthorized. Please login first.",
-            401
-        )
-
+        return "Unauthorized. Please login first.", 401
 
     conn = get_db()
 
     user = conn.execute(
         """
-        SELECT *
+        SELECT id, email, two_fa_secret
         FROM users
         WHERE id = ?
         """,
@@ -696,25 +687,70 @@ def qr_code():
 
     conn.close()
 
-
+    # User doesn't exist
     if not user:
+        return "User not found.", 404
 
-        return (
-            "User not found.",
-            404
-        )
-
-
+    # Secret doesn't exist
     secret = user["two_fa_secret"]
 
-
     if not secret:
+        return "2FA secret not found. Please open Setup 2FA again.", 404
 
-        return (
-            "2FA secret not found.",
-            404
+    try:
+
+        # Create TOTP object
+        totp = pyotp.TOTP(secret)
+
+        # Create provisioning URI
+        uri = totp.provisioning_uri(
+            name=user["email"],
+            issuer_name="Secure Login System"
         )
 
+        # Create QR code
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_M,
+            box_size=10,
+            border=4
+        )
+
+        qr.add_data(uri)
+        qr.make(fit=True)
+
+        # Generate image
+        image = qr.make_image(
+            fill_color="black",
+            back_color="white"
+        )
+
+        # Store image in memory
+        image_bytes = io.BytesIO()
+
+        image.save(
+            image_bytes,
+            format="PNG"
+        )
+
+        image_bytes.seek(0)
+
+        # Send PNG to browser
+        return send_file(
+            image_bytes,
+            mimetype="image/png",
+            max_age=0
+        )
+
+    except Exception as e:
+
+        print("QR CODE ERROR:", str(e))
+
+        return (
+            "Unable to generate QR code. "
+            "Please check the Render logs.",
+            500
+        )
 
     # --------------------------------------------------------
     # TOTP URI
