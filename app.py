@@ -48,11 +48,9 @@ def get_db():
 # ============================================================
 
 def init_db():
-
     conn = get_db()
 
-    conn.execute(
-        """
+    conn.execute("""
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
@@ -61,11 +59,14 @@ def init_db():
             two_fa_secret TEXT,
             two_fa_enabled INTEGER DEFAULT 0
         )
-        """
-    )
+    """)
 
     conn.commit()
     conn.close()
+
+
+# Initialize database when Flask starts
+init_db()
 
 
 # ============================================================
@@ -170,7 +171,7 @@ def register():
 
             flash(
                 "An account with this email already exists.",
-                "danger"
+                "error"
             )
 
             return redirect(url_for("register"))

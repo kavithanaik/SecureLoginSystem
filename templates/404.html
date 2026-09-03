@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 | Secure Login System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<div class="page-container">
+
+    <div class="auth-card">
+
+        <div class="auth-icon">🔍</div>
+
+        <h1>Page Not Found</h1>
+
+        <p>
+            Sorry, the page you are looking for does not exist.
+        </p>
+
+        <a href="{{ url_for('login') }}" class="primary-button">
+            ← Back to Login
+        </a>
+
+    </div>
+
+</div>
+
+</body>
+</html>
