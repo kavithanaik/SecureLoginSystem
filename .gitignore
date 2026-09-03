@@ -1,5 +1,7 @@
 users.db
+*.db
 __pycache__/
 *.pyc
-.env
 venv/
+.env
+.vscode/

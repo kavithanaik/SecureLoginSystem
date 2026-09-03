@@ -1,13 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Secure Login</title>
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='style.css') }}">
+    <title>Login | Secure Login System</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+
 </head>
 
 <body>
@@ -16,66 +25,103 @@
 
     <div class="auth-card">
 
-        <h1>Secure Login</h1>
+        <div class="auth-icon">
+            🔐
+        </div>
 
-        <p class="subtitle">
-            Sign in to access your account
+        <h1>
+            Welcome Back
+        </h1>
+
+        <p class="auth-subtitle">
+            Login securely to your account
         </p>
+
+
+        <!-- FLASH MESSAGES -->
 
         {% with messages = get_flashed_messages(with_categories=true) %}
 
-            {% for category, message in messages %}
+            {% if messages %}
 
-                <div class="message {{ category }}">
-                    {{ message }}
+                <div class="flash-container">
+
+                    {% for category, message in messages %}
+
+                        <div class="flash {{ category }}">
+                            {{ message }}
+                        </div>
+
+                    {% endfor %}
+
                 </div>
 
-            {% endfor %}
+            {% endif %}
 
         {% endwith %}
 
 
-        <form method="POST"
-              action="{{ url_for('login') }}">
+        <!-- LOGIN FORM -->
 
-            <label>Email Address</label>
+        <form
+            method="POST"
+            action="{{ url_for('login') }}"
+            class="auth-form"
+        >
 
-            <input
-                type="email"
-                name="email"
-                placeholder="Enter your email"
-                required
-            >
+            <div class="form-group">
 
-
-            <label>Password</label>
-
-            <div class="password-box">
+                <label for="email">
+                    Email Address
+                </label>
 
                 <input
-                    type="password"
-                    id="loginPassword"
-                    name="password"
-                    placeholder="Enter your password"
+                    type="email"
+                    id="email"
+                    name="email"
+                    placeholder="Enter your email"
+                    autocomplete="email"
                     required
                 >
 
-                <button
-                    type="button"
-                    class="show-password"
-                    onclick="togglePassword('loginPassword', this)"
-                >
-                    Show
-                </button>
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="password">
+                    Password
+                </label>
+
+                <div class="password-box">
+
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="Enter your password"
+                        autocomplete="current-password"
+                        required
+                    >
+
+                    <button
+                        type="button"
+                        class="show-password"
+                        onclick="togglePassword()"
+                    >
+                        Show
+                    </button>
+
+                </div>
 
             </div>
 
 
             <button
                 type="submit"
-                class="primary-btn"
+                class="primary-btn auth-button"
             >
-                Login
+                🔓 Login
             </button>
 
         </form>
@@ -95,7 +141,36 @@
 
 </div>
 
-<script src="{{ url_for('static', filename='script.js') }}"></script>
+
+<script>
+
+function togglePassword() {
+
+    const password =
+        document.getElementById("password");
+
+    const button =
+        document.querySelector(".show-password");
+
+
+    if (password.type === "password") {
+
+        password.type = "text";
+
+        button.textContent = "Hide";
+
+    } else {
+
+        password.type = "password";
+
+        button.textContent = "Show";
+
+    }
+
+}
+
+</script>
 
 </body>
+
 </html>

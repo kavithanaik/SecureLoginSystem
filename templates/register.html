@@ -5,13 +5,17 @@
 
     <meta charset="UTF-8">
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-    <title>Create Account</title>
+    <title>Create Account | Secure Login System</title>
 
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='style.css') }}">
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
 
 </head>
 
@@ -21,103 +25,157 @@
 
     <div class="auth-card">
 
-        <h1>Create Account</h1>
+        <div class="auth-icon">
+            🛡️
+        </div>
 
-        <p class="subtitle">
+        <h1>
+            Create Account
+        </h1>
+
+        <p class="auth-subtitle">
             Create your secure account
         </p>
 
 
+        <!-- FLASH MESSAGES -->
+
         {% with messages = get_flashed_messages(with_categories=true) %}
 
-            {% for category, message in messages %}
+            {% if messages %}
 
-                <div class="message {{ category }}">
-                    {{ message }}
+                <div class="flash-container">
+
+                    {% for category, message in messages %}
+
+                        <div class="flash {{ category }}">
+                            {{ message }}
+                        </div>
+
+                    {% endfor %}
+
                 </div>
 
-            {% endfor %}
+            {% endif %}
 
         {% endwith %}
 
 
-        <form method="POST"
-              action="{{ url_for('register') }}">
+        <!-- REGISTER FORM -->
 
-            <label>Full Name</label>
+        <form
+            method="POST"
+            action="{{ url_for('register') }}"
+            class="auth-form"
+        >
 
-            <input
-                type="text"
-                name="name"
-                placeholder="Enter your full name"
-                maxlength="100"
-                required
-            >
+            <div class="form-group">
 
-
-            <label>Email Address</label>
-
-            <input
-                type="email"
-                name="email"
-                placeholder="Enter your email"
-                required
-            >
-
-
-            <label>Password</label>
-
-            <div class="password-box">
+                <label for="name">
+                    Full Name
+                </label>
 
                 <input
-                    type="password"
-                    id="registerPassword"
-                    name="password"
-                    placeholder="Create a password"
-                    minlength="8"
+                    type="text"
+                    id="name"
+                    name="name"
+                    placeholder="Enter your full name"
+                    autocomplete="name"
                     required
                 >
-
-                <button
-                    type="button"
-                    class="show-password"
-                    onclick="togglePassword('registerPassword', this)"
-                >
-                    Show
-                </button>
 
             </div>
 
 
-            <label>Confirm Password</label>
+            <div class="form-group">
 
-            <div class="password-box">
+                <label for="email">
+                    Email Address
+                </label>
 
                 <input
-                    type="password"
-                    id="confirmPassword"
-                    name="confirm_password"
-                    placeholder="Confirm your password"
-                    minlength="8"
+                    type="email"
+                    id="email"
+                    name="email"
+                    placeholder="Enter your email"
+                    autocomplete="email"
                     required
                 >
 
-                <button
-                    type="button"
-                    class="show-password"
-                    onclick="togglePassword('confirmPassword', this)"
-                >
-                    Show
-                </button>
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="password">
+                    Password
+                </label>
+
+                <div class="password-box">
+
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="Create a password"
+                        minlength="6"
+                        autocomplete="new-password"
+                        required
+                    >
+
+                    <button
+                        type="button"
+                        class="show-password"
+                        onclick="togglePassword('password', this)"
+                    >
+                        Show
+                    </button>
+
+                </div>
+
+                <small class="password-hint">
+                    Password must contain at least 6 characters.
+                </small>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="confirm_password">
+                    Confirm Password
+                </label>
+
+                <div class="password-box">
+
+                    <input
+                        type="password"
+                        id="confirm_password"
+                        name="confirm_password"
+                        placeholder="Confirm your password"
+                        minlength="6"
+                        autocomplete="new-password"
+                        required
+                    >
+
+                    <button
+                        type="button"
+                        class="show-password"
+                        onclick="togglePassword('confirm_password', this)"
+                    >
+                        Show
+                    </button>
+
+                </div>
 
             </div>
 
 
             <button
                 type="submit"
-                class="primary-btn"
+                class="primary-btn auth-button"
             >
-                Create Account
+                🛡️ Create Account
             </button>
 
         </form>
@@ -137,7 +195,32 @@
 
 </div>
 
-<script src="{{ url_for('static', filename='script.js') }}"></script>
+
+<script>
+
+function togglePassword(inputId, button) {
+
+    const input =
+        document.getElementById(inputId);
+
+    if (input.type === "password") {
+
+        input.type = "text";
+
+        button.textContent = "Hide";
+
+    } else {
+
+        input.type = "password";
+
+        button.textContent = "Show";
+
+    }
+
+}
+
+</script>
 
 </body>
+
 </html>

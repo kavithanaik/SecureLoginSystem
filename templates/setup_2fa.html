@@ -10,7 +10,7 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>Setup 2FA</title>
+    <title>Setup 2FA | Secure Login System</title>
 
     <link
         rel="stylesheet"
@@ -19,46 +19,44 @@
 
 </head>
 
-
 <body>
 
-<div class="auth-container">
+<div class="page-container">
 
-    <div class="auth-card twofa-card">
+    <div class="twofa-card">
 
-
-        <!-- ICON -->
-
-        <div class="lock-icon">
+        <div class="twofa-icon">
             🔐
         </div>
-
-
-        <!-- TITLE -->
 
         <h1>
             Setup 2FA
         </h1>
 
-
-        <p class="subtitle">
+        <p class="twofa-description">
             Secure your account using an authenticator app.
         </p>
 
 
-        <!-- FLASH MESSAGE -->
+        <!-- FLASH MESSAGES -->
 
-        {% with messages =
-            get_flashed_messages(with_categories=true)
-        %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
 
-            {% for category, message in messages %}
+            {% if messages %}
 
-                <div class="message {{ category }}">
-                    {{ message }}
+                <div class="flash-container">
+
+                    {% for category, message in messages %}
+
+                        <div class="flash {{ category }}">
+                            {{ message }}
+                        </div>
+
+                    {% endfor %}
+
                 </div>
 
-            {% endfor %}
+            {% endif %}
 
         {% endwith %}
 
@@ -67,30 +65,27 @@
 
         <div class="twofa-info">
 
-            <p>
-                <strong>Login successful.</strong>
-            </p>
+            <strong>
+                Scan this QR code
+            </strong>
 
-            <p>
-                Scan this QR code using
-                Google Authenticator,
-                Microsoft Authenticator,
-                Authy,
-                or another compatible
-                authenticator app.
-            </p>
+            <br>
+
+            Open Google Authenticator,
+            Microsoft Authenticator,
+            Authy, or another compatible
+            authenticator application.
 
         </div>
 
 
         <!-- QR CODE -->
 
-        <div class="qr-container">
+        <div class="qr-section">
 
             <h2>
                 2FA QR Code
             </h2>
-
 
             <div class="qr-box">
 
@@ -102,12 +97,19 @@
 
             </div>
 
-
             <p class="qr-instruction">
 
-                Open your authenticator app,
-                select <strong>Scan QR Code</strong>,
-                and scan the code above.
+                Select
+                <strong>Scan QR Code</strong>
+                in your authenticator app.
+
+            </p>
+
+            <p class="qr-apps">
+
+                Google Authenticator •
+                Microsoft Authenticator •
+                Authy
 
             </p>
 
@@ -122,17 +124,13 @@
                 Manual Setup Key
             </h2>
 
-
             <p>
                 If you cannot scan the QR code,
                 enter this key manually.
             </p>
 
-
             <div class="secret-key">
-
                 {{ secret }}
-
             </div>
 
         </div>
@@ -154,35 +152,30 @@
         <form
             method="POST"
             action="{{ url_for('enable_2fa') }}"
+            class="otp-form"
         >
 
             <label for="otp">
                 Enter 6-Digit Code
             </label>
 
-
             <input
-                id="otp"
                 type="text"
+                id="otp"
                 name="otp"
-                maxlength="6"
-                minlength="6"
-                pattern="[0-9]{6}"
                 inputmode="numeric"
                 autocomplete="one-time-code"
+                maxlength="6"
+                pattern="[0-9]{6}"
                 placeholder="123456"
                 required
-                autofocus
             >
-
 
             <button
                 type="submit"
-                class="primary-btn"
+                class="verify-button"
             >
-
-                🔒 Enable 2FA
-
+                🔐 Enable 2FA
             </button>
 
         </form>
@@ -190,20 +183,37 @@
 
         <!-- BACK -->
 
-        <p class="bottom-text">
-
-            <a href="{{ url_for('dashboard') }}">
-
-                ← Back to Dashboard
-
-            </a>
-
-        </p>
-
+        <a
+            href="{{ url_for('dashboard') }}"
+            class="back-login"
+        >
+            ← Back to Dashboard
+        </a>
 
     </div>
 
 </div>
+
+
+<script>
+
+const otpInput =
+    document.getElementById("otp");
+
+
+otpInput.addEventListener(
+    "input",
+    function () {
+
+        this.value =
+            this.value
+                .replace(/\D/g, "")
+                .slice(0, 6);
+
+    }
+);
+
+</script>
 
 </body>
 

@@ -1,4 +1,10 @@
 /* =========================================================
+   SECURE LOGIN SYSTEM
+   COMPLETE FIXED STYLE.CSS
+========================================================= */
+
+
+/* =========================================================
    GLOBAL RESET
 ========================================================= */
 
@@ -8,23 +14,25 @@
     box-sizing: border-box;
 }
 
-
-html,
-body {
+html {
     width: 100%;
     min-height: 100%;
+    scroll-behavior: smooth;
 }
 
-
 body {
+    width: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
+
     font-family: Arial, Helvetica, sans-serif;
 
     background:
         linear-gradient(
             135deg,
-            #0f172a,
-            #1e293b,
-            #312e81
+            #0f172a 0%,
+            #1e293b 50%,
+            #312e81 100%
         );
 
     color: #ffffff;
@@ -32,38 +40,32 @@ body {
 
 
 /* =========================================================
-   GENERAL PAGE CONTAINER
+   PAGE CONTAINER
 ========================================================= */
 
 .page-container {
     width: 100%;
-
     min-height: 100vh;
     min-height: 100dvh;
 
     display: flex;
-
     justify-content: center;
     align-items: center;
 
     padding: 15px;
-
-    overflow: hidden;
 }
 
 
 /* =========================================================
-   LOGIN / REGISTER CONTAINER
+   AUTH CONTAINER
 ========================================================= */
 
 .auth-container {
     width: 100%;
-
     min-height: 100vh;
     min-height: 100dvh;
 
     display: flex;
-
     justify-content: center;
     align-items: center;
 
@@ -72,12 +74,11 @@ body {
 
 
 /* =========================================================
-   LOGIN / REGISTER CARD
+   AUTH CARD
 ========================================================= */
 
 .auth-card {
     width: 100%;
-
     max-width: 430px;
 
     background: #ffffff;
@@ -92,11 +93,54 @@ body {
 
     box-shadow:
         0 20px 50px rgba(0, 0, 0, 0.25);
+
+    animation: cardAppear 0.45s ease;
 }
 
 
 /* =========================================================
-   LOGIN / REGISTER HEADING
+   CARD ANIMATION
+========================================================= */
+
+@keyframes cardAppear {
+
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+}
+
+
+/* =========================================================
+   AUTH ICON
+========================================================= */
+
+.auth-icon {
+    width: 58px;
+    height: 58px;
+
+    margin: 0 auto 12px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    border-radius: 50%;
+
+    background: #eef2ff;
+
+    font-size: 28px;
+}
+
+
+/* =========================================================
+   AUTH HEADING
 ========================================================= */
 
 .auth-card h1 {
@@ -111,11 +155,11 @@ body {
 
 
 /* =========================================================
-   SUBTITLE
+   AUTH SUBTITLE
 ========================================================= */
 
-.subtitle,
-.auth-subtitle {
+.auth-subtitle,
+.subtitle {
     text-align: center;
 
     color: #64748b;
@@ -136,8 +180,9 @@ body {
     width: 100%;
 }
 
-
 .form-group {
+    width: 100%;
+
     margin-bottom: 18px;
 }
 
@@ -174,15 +219,32 @@ body {
 
     border-radius: 9px;
 
-    font-size: 15px;
+    background: #ffffff;
 
     color: #172b4d;
 
+    font-size: 15px;
+
     outline: none;
 
-    transition: 0.2s;
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
 }
 
+
+/* =========================================================
+   INPUT PLACEHOLDER
+========================================================= */
+
+.auth-card input::placeholder {
+    color: #94a3b8;
+}
+
+
+/* =========================================================
+   INPUT FOCUS
+========================================================= */
 
 .auth-card input:focus {
     border-color: #4f46e5;
@@ -199,24 +261,29 @@ body {
 .password-box,
 .password-wrapper {
     position: relative;
-}
 
-
-.password-box input,
-.password-wrapper input {
-    padding-right: 70px;
+    width: 100%;
 }
 
 
 /* =========================================================
-   SHOW PASSWORD
+   PASSWORD INPUT
+========================================================= */
+
+.password-box input,
+.password-wrapper input {
+    padding-right: 75px;
+}
+
+
+/* =========================================================
+   SHOW PASSWORD BUTTON
 ========================================================= */
 
 .show-password {
     position: absolute;
 
     right: 10px;
-
     top: 50%;
 
     transform: translateY(-50%);
@@ -227,9 +294,36 @@ body {
 
     color: #4f46e5;
 
+    font-size: 13px;
+
     font-weight: bold;
 
     cursor: pointer;
+
+    padding: 5px;
+
+    transition: color 0.2s ease;
+}
+
+.show-password:hover {
+    color: #3730a3;
+}
+
+
+/* =========================================================
+   PASSWORD HINT
+========================================================= */
+
+.password-hint {
+    display: block;
+
+    margin-top: 6px;
+
+    color: #64748b;
+
+    font-size: 11px;
+
+    line-height: 1.4;
 }
 
 
@@ -276,9 +370,15 @@ body {
 
     text-align: center;
 
-    transition: 0.2s;
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
 }
 
+
+/* =========================================================
+   PRIMARY BUTTON HOVER
+========================================================= */
 
 .primary-btn:hover,
 .auth-button:hover {
@@ -290,21 +390,12 @@ body {
 
 
 /* =========================================================
-   SMALL DASHBOARD 2FA BUTTON
+   PRIMARY BUTTON ACTIVE
 ========================================================= */
 
-.setup-2fa-button {
-    width: auto;
-
-    min-height: 42px;
-
-    padding: 10px 18px;
-
-    font-size: 14px;
-
-    margin-top: 5px;
-
-    display: inline-flex;
+.primary-btn:active,
+.auth-button:active {
+    transform: translateY(0);
 }
 
 
@@ -321,6 +412,8 @@ body {
     color: #64748b;
 
     font-size: 14px;
+
+    line-height: 1.5;
 }
 
 
@@ -330,48 +423,104 @@ body {
 
 .bottom-text a,
 .auth-footer a,
-.back-link {
+.back-link,
+.back-login {
     color: #4f46e5;
 
     font-weight: bold;
 
     text-decoration: none;
+
+    transition: color 0.2s ease;
 }
 
 
+/* =========================================================
+   LINK HOVER
+========================================================= */
+
 .bottom-text a:hover,
 .auth-footer a:hover,
-.back-link:hover {
+.back-link:hover,
+.back-login:hover {
+    color: #3730a3;
+
     text-decoration: underline;
 }
 
 
 /* =========================================================
-   FLASH MESSAGES
+   FLASH MESSAGE CONTAINER
 ========================================================= */
 
 .flash-container {
     width: 100%;
 
-    margin: 15px auto;
-}
-
-
-.flash {
-    padding: 10px 14px;
-
-    margin-bottom: 15px;
-
-    border-radius: 8px;
-
-    font-size: 14px;
-
-    text-align: center;
+    margin-bottom: 18px;
 }
 
 
 /* =========================================================
-   SUCCESS
+   FLASH MESSAGE
+========================================================= */
+
+.flash {
+    width: 100%;
+
+    padding: 12px 15px;
+
+    margin-bottom: 10px;
+
+    border-radius: 9px;
+
+    text-align: center;
+
+    font-size: 14px;
+
+    font-weight: 600;
+
+    line-height: 1.4;
+
+    word-wrap: break-word;
+
+    animation: flashAppear 0.3s ease;
+}
+
+
+/* =========================================================
+   FLASH ANIMATION
+========================================================= */
+
+@keyframes flashAppear {
+
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+}
+
+
+/* =========================================================
+   ERROR MESSAGE - RED
+========================================================= */
+
+.flash.error {
+    color: #b91c1c;
+
+    background: #fee2e2;
+
+    border: 1px solid #fca5a5;
+}
+
+
+/* =========================================================
+   SUCCESS MESSAGE - GREEN
 ========================================================= */
 
 .flash.success {
@@ -379,38 +528,12 @@ body {
 
     background: #dcfce7;
 
-    border: 1px solid #bbf7d0;
+    border: 1px solid #86efac;
 }
 
 
 /* =========================================================
-   ERROR
-========================================================= */
-
-.flash.error {
-    color: #dc2626;
-
-    background: #fee2e2;
-
-    border: 1px solid #fecaca;
-}
-
-
-/* =========================================================
-   DANGER
-========================================================= */
-
-.flash.danger {
-    color: #b91c1c;
-
-    background: #fee2e2;
-
-    border: 1px solid #fecaca;
-}
-
-
-/* =========================================================
-   WARNING
+   WARNING MESSAGE - ORANGE
 ========================================================= */
 
 .flash.warning {
@@ -418,12 +541,12 @@ body {
 
     background: #fef3c7;
 
-    border: 1px solid #fde68a;
+    border: 1px solid #fcd34d;
 }
 
 
 /* =========================================================
-   INFO
+   INFO MESSAGE - BLUE
 ========================================================= */
 
 .flash.info {
@@ -431,28 +554,32 @@ body {
 
     background: #dbeafe;
 
-    border: 1px solid #bfdbfe;
+    border: 1px solid #93c5fd;
 }
 
 
 /* =========================================================
-   DASHBOARD
+   DASHBOARD CONTAINER
 ========================================================= */
 
 .dashboard-container {
-    min-height: 100vh;
+    width: 100%;
 
+    min-height: 100vh;
     min-height: 100dvh;
 
     display: flex;
 
     justify-content: center;
-
     align-items: center;
 
     padding: 20px;
 }
 
+
+/* =========================================================
+   DASHBOARD CARD
+========================================================= */
 
 .dashboard-card {
     width: 100%;
@@ -471,6 +598,18 @@ body {
 
     box-shadow:
         0 20px 50px rgba(0, 0, 0, 0.25);
+
+    animation: cardAppear 0.45s ease;
+}
+
+
+/* =========================================================
+   DASHBOARD ICON
+========================================================= */
+
+.dashboard-card .auth-icon {
+    margin-left: 0;
+    margin-right: 0;
 }
 
 
@@ -484,13 +623,21 @@ body {
     margin-bottom: 10px;
 
     color: #111827;
+
+    line-height: 1.2;
 }
 
+
+/* =========================================================
+   DASHBOARD SUBTITLE
+========================================================= */
 
 .dashboard-subtitle {
     color: #64748b;
 
     font-size: 17px;
+
+    line-height: 1.5;
 
     margin-bottom: 25px;
 }
@@ -513,12 +660,22 @@ body {
 }
 
 
+/* =========================================================
+   ACCOUNT BOX HEADING
+========================================================= */
+
 .account-box h2 {
     margin-bottom: 10px;
 
     color: #1e293b;
+
+    font-size: 21px;
 }
 
+
+/* =========================================================
+   ACCOUNT BOX TEXT
+========================================================= */
 
 .account-box p {
     font-size: 16px;
@@ -526,6 +683,8 @@ body {
     margin: 8px 0;
 
     color: #475569;
+
+    line-height: 1.5;
 }
 
 
@@ -537,8 +696,14 @@ body {
     font-size: 16px;
 
     margin-bottom: 15px;
+
+    color: #475569;
 }
 
+
+/* =========================================================
+   ENABLED
+========================================================= */
 
 .enabled {
     color: #168044;
@@ -546,6 +711,10 @@ body {
     font-weight: bold;
 }
 
+
+/* =========================================================
+   AVAILABLE
+========================================================= */
 
 .available {
     color: #4f46e5;
@@ -559,11 +728,11 @@ body {
 ========================================================= */
 
 .twofa-enabled-box {
-    background: #e7f7ed;
+    background: #ecfdf5;
 
-    color: #168044;
+    color: #166534;
 
-    padding: 13px;
+    padding: 14px;
 
     border-radius: 9px;
 
@@ -571,7 +740,9 @@ body {
 
     font-weight: bold;
 
-    border: 1px solid #a8dfbd;
+    border: 1px solid #86efac;
+
+    line-height: 1.5;
 }
 
 
@@ -580,16 +751,43 @@ body {
 ========================================================= */
 
 .dashboard-actions {
-    margin-top: 5px;
+    margin-top: 12px;
 }
 
 
 /* =========================================================
-   LOGOUT
+   SETUP 2FA BUTTON
+========================================================= */
+
+.setup-2fa-button {
+    width: auto;
+
+    min-height: 44px;
+
+    padding: 10px 18px;
+
+    font-size: 14px;
+
+    margin-top: 5px;
+
+    display: inline-flex;
+
+    justify-content: center;
+
+    align-items: center;
+}
+
+
+/* =========================================================
+   LOGOUT BUTTON
 ========================================================= */
 
 .logout-btn {
-    display: inline-block;
+    display: inline-flex;
+
+    justify-content: center;
+
+    align-items: center;
 
     background: #e3262e;
 
@@ -599,20 +797,32 @@ body {
 
     padding: 10px 20px;
 
+    min-height: 42px;
+
     border-radius: 9px;
 
     font-size: 14px;
 
     font-weight: bold;
 
-    transition: 0.2s;
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
 }
 
+
+/* =========================================================
+   LOGOUT HOVER
+========================================================= */
 
 .logout-btn:hover {
     background: #c91d24;
 
     transform: translateY(-1px);
+
+    box-shadow:
+        0 6px 15px rgba(227, 38, 46, 0.25);
 }
 
 
@@ -626,6 +836,8 @@ body {
     max-width: 520px;
 
     max-height: calc(100dvh - 30px);
+
+    overflow-y: auto;
 
     background: #ffffff;
 
@@ -642,29 +854,7 @@ body {
     box-shadow:
         0 20px 50px rgba(0, 0, 0, 0.25);
 
-    overflow: hidden;
-
     animation: cardAppear 0.5s ease;
-}
-
-
-/* =========================================================
-   2FA ANIMATION
-========================================================= */
-
-@keyframes cardAppear {
-
-    from {
-        opacity: 0;
-
-        transform: translateY(15px);
-    }
-
-    to {
-        opacity: 1;
-
-        transform: translateY(0);
-    }
 }
 
 
@@ -703,6 +893,8 @@ body {
     margin-bottom: 7px;
 
     color: #111827;
+
+    line-height: 1.2;
 }
 
 
@@ -715,7 +907,7 @@ body {
 
     font-size: 14px;
 
-    line-height: 1.4;
+    line-height: 1.5;
 
     margin-bottom: 15px;
 }
@@ -734,9 +926,13 @@ body {
 
     background: #f8fafc;
 
-    line-height: 1.4;
+    line-height: 1.5;
 
     font-size: 13px;
+
+    color: #475569;
+
+    border: 1px solid #e2e8f0;
 }
 
 
@@ -756,6 +952,10 @@ body {
     margin-bottom: 14px;
 }
 
+
+/* =========================================================
+   QR HEADING
+========================================================= */
 
 .qr-section h2 {
     font-size: 17px;
@@ -822,84 +1022,22 @@ body {
 
     color: #475569;
 
-    line-height: 1.4;
+    line-height: 1.5;
 
     margin-bottom: 3px;
 }
 
 
+/* =========================================================
+   AUTHENTICATOR APP TEXT
+========================================================= */
+
 .qr-apps {
     font-size: 10px;
 
     color: #64748b;
-}
 
-
-/* =========================================================
-   OLD QR CONTAINER SUPPORT
-========================================================= */
-
-.qr-container {
-    display: flex;
-
-    flex-direction: column;
-
-    align-items: center;
-
-    justify-content: center;
-
-    margin: 12px 0;
-}
-
-
-.qr-container h2 {
-    font-size: 17px;
-
-    margin-bottom: 9px;
-}
-
-
-.qr-container img {
-    width: 175px;
-
-    height: 175px;
-
-    object-fit: contain;
-
-    image-rendering: pixelated;
-}
-
-
-/* =========================================================
-   MANUAL KEY
-========================================================= */
-
-.manual-key {
-    background: #f8fafc;
-
-    border: 1px solid #dfe3e8;
-
-    border-radius: 10px;
-
-    padding: 11px;
-
-    margin: 12px 0;
-}
-
-
-.manual-key h2 {
-    font-size: 16px;
-
-    margin-bottom: 6px;
-}
-
-
-.manual-key span {
-    font-size: 12px;
-
-    word-break: break-all;
-
-    color: #172b4d;
+    line-height: 1.4;
 }
 
 
@@ -914,17 +1052,27 @@ body {
 }
 
 
+/* =========================================================
+   MANUAL HEADING
+========================================================= */
+
 .manual-section h2 {
     font-size: 16px;
 
     margin-bottom: 6px;
+
+    color: #1e293b;
 }
 
+
+/* =========================================================
+   MANUAL DESCRIPTION
+========================================================= */
 
 .manual-section p {
     font-size: 12px;
 
-    line-height: 1.4;
+    line-height: 1.5;
 
     color: #64748b;
 }
@@ -941,6 +1089,8 @@ body {
 
     background: #f1f5f9;
 
+    border: 1px solid #e2e8f0;
+
     border-radius: 8px;
 
     font-family: monospace;
@@ -952,6 +1102,8 @@ body {
     letter-spacing: 1px;
 
     word-break: break-all;
+
+    color: #172b4d;
 }
 
 
@@ -970,6 +1122,10 @@ body {
 }
 
 
+/* =========================================================
+   DIVIDER LINES
+========================================================= */
+
 .divider::before,
 .divider::after {
     content: "";
@@ -981,6 +1137,10 @@ body {
     flex: 1;
 }
 
+
+/* =========================================================
+   DIVIDER TEXT
+========================================================= */
 
 .divider span {
     font-size: 10px;
@@ -1000,9 +1160,15 @@ body {
 ========================================================= */
 
 .otp-form {
+    width: 100%;
+
     text-align: left;
 }
 
+
+/* =========================================================
+   OTP LABEL
+========================================================= */
 
 .otp-form label,
 .twofa-card label {
@@ -1044,9 +1210,13 @@ input[name="otp"] {
 
     color: #1e293b;
 
+    background: #ffffff;
+
     outline: none;
 
-    transition: 0.2s;
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
 
     margin-bottom: 10px;
 }
@@ -1060,7 +1230,7 @@ input[name="otp"] {
 input[name="otp"]::placeholder {
     color: #cbd5e1;
 
-    letter-spacing: 6px;
+    letter-spacing: 5px;
 }
 
 
@@ -1105,12 +1275,18 @@ input[name="otp"]:focus {
 
     cursor: pointer;
 
-    transition: 0.2s;
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
 
     box-shadow:
         0 6px 15px rgba(79, 70, 229, 0.25);
 }
 
+
+/* =========================================================
+   VERIFY BUTTON HOVER
+========================================================= */
 
 .verify-button:hover {
     transform: translateY(-1px);
@@ -1120,13 +1296,17 @@ input[name="otp"]:focus {
 }
 
 
+/* =========================================================
+   VERIFY BUTTON ACTIVE
+========================================================= */
+
 .verify-button:active {
     transform: translateY(0);
 }
 
 
 /* =========================================================
-   BACK TO LOGIN
+   BACK LOGIN
 ========================================================= */
 
 .back-login {
@@ -1141,49 +1321,200 @@ input[name="otp"]:focus {
     font-weight: bold;
 
     text-decoration: none;
-
-    transition: 0.2s;
-}
-
-
-.back-login:hover {
-    color: #3730a3;
-
-    text-decoration: underline;
 }
 
 
 /* =========================================================
-   LOCK ICON
+   SUCCESS MESSAGE
 ========================================================= */
 
-.lock-icon {
-    font-size: 38px;
+.twofa-success-message {
+    display: flex;
 
-    text-align: center;
+    align-items: center;
 
-    margin-bottom: 7px;
+    gap: 12px;
+
+    width: 100%;
+
+    margin-bottom: 15px;
+
+    padding: 14px 16px;
+
+    background: #ecfdf5;
+
+    color: #166534;
+
+    border: 1px solid #86efac;
+
+    border-radius: 10px;
+
+    text-align: left;
+
+    animation: successAppear 0.35s ease;
 }
 
 
 /* =========================================================
-   MOBILE
+   SUCCESS ANIMATION
+========================================================= */
+
+@keyframes successAppear {
+
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+}
+
+
+/* =========================================================
+   SUCCESS ICON
+========================================================= */
+
+.success-icon {
+    width: 32px;
+
+    height: 32px;
+
+    min-width: 32px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #22c55e;
+
+    color: #ffffff;
+
+    font-size: 19px;
+
+    font-weight: bold;
+}
+
+
+/* =========================================================
+   SUCCESS TITLE
+========================================================= */
+
+.twofa-success-message strong {
+    display: block;
+
+    font-size: 14px;
+
+    margin-bottom: 3px;
+}
+
+
+/* =========================================================
+   SUCCESS DESCRIPTION
+========================================================= */
+
+.twofa-success-message p {
+    margin: 0;
+
+    font-size: 12px;
+
+    color: #166534;
+
+    line-height: 1.4;
+}
+
+
+/* =========================================================
+   DISABLED BUTTON
+========================================================= */
+
+button:disabled,
+.auth-button:disabled,
+.verify-button:disabled {
+    opacity: 0.6;
+
+    cursor: not-allowed;
+
+    transform: none;
+
+    box-shadow: none;
+}
+
+
+/* =========================================================
+   ACCESSIBILITY
+========================================================= */
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+    outline: 3px solid rgba(99, 102, 241, 0.35);
+
+    outline-offset: 2px;
+}
+
+
+/* =========================================================
+   MOBILE - 600px
 ========================================================= */
 
 @media (max-width: 600px) {
 
+    .auth-container {
+        padding: 15px;
+    }
+
+
     .auth-card {
         padding: 28px 22px;
+
+        border-radius: 16px;
+    }
+
+
+    .auth-card h1 {
+        font-size: 28px;
+    }
+
+
+    .auth-subtitle {
+        font-size: 14px;
+    }
+
+
+    .flash {
+        font-size: 13px;
+
+        padding: 11px 12px;
+    }
+
+
+    .dashboard-container {
+        padding: 15px;
     }
 
 
     .dashboard-card {
         padding: 28px 22px;
+
+        border-radius: 16px;
     }
 
 
     .dashboard-card h1 {
         font-size: 30px;
+    }
+
+
+    .dashboard-subtitle {
+        font-size: 15px;
     }
 
 
@@ -1224,13 +1555,6 @@ input[name="otp"]:focus {
     }
 
 
-    .qr-container img {
-        width: 165px;
-
-        height: 165px;
-    }
-
-
     .otp-form input,
     input[name="otp"] {
         height: 48px;
@@ -1251,7 +1575,7 @@ input[name="otp"]:focus {
 
 
 /* =========================================================
-   SHORT SCREEN
+   SHORT SCREEN - 750px
 ========================================================= */
 
 @media (max-height: 750px) {
@@ -1295,6 +1619,15 @@ input[name="otp"]:focus {
     }
 
 
+    .twofa-info {
+        padding: 9px;
+
+        margin: 9px 0;
+
+        font-size: 12px;
+    }
+
+
     .qr-section {
         padding: 10px 14px;
 
@@ -1317,13 +1650,6 @@ input[name="otp"]:focus {
         padding: 6px;
 
         margin-bottom: 6px;
-    }
-
-
-    .qr-container img {
-        width: 155px;
-
-        height: 155px;
     }
 
 
@@ -1376,7 +1702,7 @@ input[name="otp"]:focus {
 
 
 /* =========================================================
-   VERY SHORT SCREEN
+   VERY SHORT SCREEN - 600px
 ========================================================= */
 
 @media (max-height: 600px) {
@@ -1413,6 +1739,15 @@ input[name="otp"]:focus {
     }
 
 
+    .twofa-info {
+        padding: 6px;
+
+        margin: 6px 0;
+
+        font-size: 10px;
+    }
+
+
     .qr-section {
         padding: 6px 9px;
 
@@ -1433,13 +1768,6 @@ input[name="otp"]:focus {
         height: 120px;
 
         padding: 5px;
-    }
-
-
-    .qr-container img {
-        width: 120px;
-
-        height: 120px;
     }
 
 

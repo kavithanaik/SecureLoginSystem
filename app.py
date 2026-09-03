@@ -15,7 +15,6 @@ import pyotp
 import qrcode
 import io
 import os
-import secrets
 import re
 
 
@@ -25,14 +24,29 @@ import re
 
 app = Flask(__name__)
 
+# Use an environment variable if available.
+# Otherwise use a stable local development key.
 app.secret_key = os.environ.get(
     "SECRET_KEY",
-    secrets.token_hex(32)
+    "secure-login-system-development-secret-key-change-this"
 )
 
-# Use an absolute path so SQLite works correctly on Render
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DATABASE = os.path.join(BASE_DIR, "users.db")
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+
+
+# ============================================================
+# DATABASE CONFIGURATION
+# ============================================================
+
+BASE_DIR = os.path.dirname(
+    os.path.abspath(__file__)
+)
+
+DATABASE = os.path.join(
+    BASE_DIR,
+    "users.db"
+)
 
 
 # ============================================================
@@ -40,8 +54,14 @@ DATABASE = os.path.join(BASE_DIR, "users.db")
 # ============================================================
 
 def get_db():
-    conn = sqlite3.connect(DATABASE)
+
+    conn = sqlite3.connect(
+        DATABASE,
+        timeout=30
+    )
+
     conn.row_factory = sqlite3.Row
+
     return conn
 
 
@@ -55,12 +75,19 @@ def init_db():
 
     conn.execute("""
         CREATE TABLE IF NOT EXISTS users (
+
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+
             name TEXT NOT NULL,
+
             email TEXT UNIQUE NOT NULL,
+
             password_hash TEXT NOT NULL,
+
             two_fa_secret TEXT,
+
             two_fa_enabled INTEGER DEFAULT 0
+
         )
     """)
 
@@ -68,8 +95,21 @@ def init_db():
     conn.close()
 
 
-# Initialize database when application starts
 init_db()
+
+
+# ============================================================
+# EMAIL VALIDATION
+# ============================================================
+
+def is_valid_email(email):
+
+    pattern = r"^[^@\s]+@[^@\s]+\.[^@\s]+$"
+
+    return re.match(
+        pattern,
+        email
+    ) is not None
 
 
 # ============================================================
@@ -80,19 +120,31 @@ init_db()
 def home():
 
     if "user_id" in session:
-        return redirect(url_for("dashboard"))
 
-    return redirect(url_for("login"))
+        return redirect(
+            url_for("dashboard")
+        )
+
+    return redirect(
+        url_for("login")
+    )
 
 
 # ============================================================
 # REGISTER
 # ============================================================
 
-@app.route("/register", methods=["GET", "POST"])
+@app.route(
+    "/register",
+    methods=["GET", "POST"]
+)
 def register():
 
     if request.method == "POST":
+
+        # ----------------------------------------------------
+        # GET FORM DATA
+        # ----------------------------------------------------
 
         name = request.form.get(
             "name",
@@ -114,33 +166,43 @@ def register():
             ""
         )
 
+
         # ----------------------------------------------------
-        # REQUIRED FIELDS
+        # EMPTY FIELD CHECK
         # ----------------------------------------------------
 
-        if not name or not email or not password:
+        if (
+            not name
+            or not email
+            or not password
+            or not confirm_password
+        ):
 
             flash(
                 "Please fill in all required fields.",
-                "danger"
+                "error"
             )
 
-            return redirect(url_for("register"))
+            return redirect(
+                url_for("register")
+            )
+
 
         # ----------------------------------------------------
         # EMAIL VALIDATION
         # ----------------------------------------------------
 
-        email_pattern = r"^[^@\s]+@[^@\s]+\.[^@\s]+$"
-
-        if not re.match(email_pattern, email):
+        if not is_valid_email(email):
 
             flash(
-                "Please enter a valid email address.",
-                "danger"
+                "Invalid email address.",
+                "error"
             )
 
-            return redirect(url_for("register"))
+            return redirect(
+                url_for("register")
+            )
+
 
         # ----------------------------------------------------
         # PASSWORD CONFIRMATION
@@ -150,10 +212,13 @@ def register():
 
             flash(
                 "Passwords do not match.",
-                "danger"
+                "error"
             )
 
-            return redirect(url_for("register"))
+            return redirect(
+                url_for("register")
+            )
+
 
         # ----------------------------------------------------
         # PASSWORD LENGTH
@@ -163,16 +228,24 @@ def register():
 
             flash(
                 "Password must contain at least 6 characters.",
-                "danger"
+                "error"
             )
 
-            return redirect(url_for("register"))
+            return redirect(
+                url_for("register")
+            )
+
 
         # ----------------------------------------------------
-        # CHECK EXISTING USER
+        # DATABASE
         # ----------------------------------------------------
 
         conn = get_db()
+
+
+        # ----------------------------------------------------
+        # CHECK DUPLICATE EMAIL
+        # ----------------------------------------------------
 
         existing_user = conn.execute(
             """
@@ -183,6 +256,7 @@ def register():
             (email,)
         ).fetchone()
 
+
         if existing_user:
 
             conn.close()
@@ -192,63 +266,129 @@ def register():
                 "error"
             )
 
-            return redirect(url_for("register"))
+            return redirect(
+                url_for("register")
+            )
+
 
         # ----------------------------------------------------
         # HASH PASSWORD
         # ----------------------------------------------------
 
-        password_hash = bcrypt.hashpw(
-            password.encode("utf-8"),
-            bcrypt.gensalt()
-        ).decode("utf-8")
+        try:
+
+            password_hash = bcrypt.hashpw(
+                password.encode("utf-8"),
+                bcrypt.gensalt()
+            ).decode("utf-8")
+
+        except Exception:
+
+            conn.close()
+
+            flash(
+                "Unable to secure your password. Please try again.",
+                "error"
+            )
+
+            return redirect(
+                url_for("register")
+            )
+
 
         # ----------------------------------------------------
         # CREATE USER
         # ----------------------------------------------------
 
-        conn.execute(
-            """
-            INSERT INTO users
-            (
-                name,
-                email,
-                password_hash,
-                two_fa_secret,
-                two_fa_enabled
-            )
-            VALUES (?, ?, ?, ?, ?)
-            """,
-            (
-                name,
-                email,
-                password_hash,
-                None,
-                0
-            )
-        )
+        try:
 
-        conn.commit()
-        conn.close()
+            conn.execute(
+                """
+                INSERT INTO users
+                (
+                    name,
+                    email,
+                    password_hash,
+                    two_fa_secret,
+                    two_fa_enabled
+                )
+                VALUES (?, ?, ?, ?, ?)
+                """,
+                (
+                    name,
+                    email,
+                    password_hash,
+                    None,
+                    0
+                )
+            )
+
+            conn.commit()
+            conn.close()
+
+
+        except sqlite3.IntegrityError:
+
+            conn.close()
+
+            flash(
+                "An account with this email already exists.",
+                "error"
+            )
+
+            return redirect(
+                url_for("register")
+            )
+
+
+        except Exception:
+
+            conn.close()
+
+            flash(
+                "Unable to create your account. Please try again.",
+                "error"
+            )
+
+            return redirect(
+                url_for("register")
+            )
+
+
+        # ----------------------------------------------------
+        # SUCCESS
+        # ----------------------------------------------------
 
         flash(
             "Account created successfully. Please log in.",
             "success"
         )
 
-        return redirect(url_for("login"))
+        return redirect(
+            url_for("login")
+        )
 
-    return render_template("register.html")
+
+    return render_template(
+        "register.html"
+    )
 
 
 # ============================================================
 # LOGIN
 # ============================================================
 
-@app.route("/login", methods=["GET", "POST"])
+@app.route(
+    "/login",
+    methods=["GET", "POST"]
+)
 def login():
 
     if request.method == "POST":
+
+        # ----------------------------------------------------
+        # FORM DATA
+        # ----------------------------------------------------
 
         email = request.form.get(
             "email",
@@ -260,18 +400,38 @@ def login():
             ""
         )
 
+
         # ----------------------------------------------------
-        # EMPTY FIELDS
+        # EMPTY CHECK
         # ----------------------------------------------------
 
         if not email or not password:
 
             flash(
                 "Please enter your email and password.",
-                "danger"
+                "error"
             )
 
-            return redirect(url_for("login"))
+            return redirect(
+                url_for("login")
+            )
+
+
+        # ----------------------------------------------------
+        # EMAIL FORMAT
+        # ----------------------------------------------------
+
+        if not is_valid_email(email):
+
+            flash(
+                "Invalid email address.",
+                "error"
+            )
+
+            return redirect(
+                url_for("login")
+            )
+
 
         # ----------------------------------------------------
         # FIND USER
@@ -290,6 +450,7 @@ def login():
 
         conn.close()
 
+
         # ----------------------------------------------------
         # USER NOT FOUND
         # ----------------------------------------------------
@@ -301,7 +462,10 @@ def login():
                 "error"
             )
 
-            return redirect(url_for("login"))
+            return redirect(
+                url_for("login")
+            )
+
 
         # ----------------------------------------------------
         # CHECK PASSWORD
@@ -318,6 +482,7 @@ def login():
 
             password_correct = False
 
+
         # ----------------------------------------------------
         # WRONG PASSWORD
         # ----------------------------------------------------
@@ -329,7 +494,10 @@ def login():
                 "error"
             )
 
-            return redirect(url_for("login"))
+            return redirect(
+                url_for("login")
+            )
+
 
         # ====================================================
         # 2FA ENABLED
@@ -345,6 +513,7 @@ def login():
                 url_for("verify_2fa")
             )
 
+
         # ====================================================
         # NORMAL LOGIN
         # ====================================================
@@ -355,16 +524,21 @@ def login():
         session["name"] = user["name"]
         session["email"] = user["email"]
 
+
         flash(
             "Login successful.",
             "success"
         )
 
+
         return redirect(
             url_for("dashboard")
         )
 
-    return render_template("login.html")
+
+    return render_template(
+        "login.html"
+    )
 
 
 # ============================================================
@@ -385,7 +559,9 @@ def setup_2fa():
             url_for("login")
         )
 
+
     user_id = session["user_id"]
+
 
     conn = get_db()
 
@@ -400,18 +576,20 @@ def setup_2fa():
 
     conn.close()
 
+
     if not user:
 
         session.clear()
 
         flash(
             "User account not found.",
-            "danger"
+            "error"
         )
 
         return redirect(
             url_for("login")
         )
+
 
     # --------------------------------------------------------
     # ALREADY ENABLED
@@ -428,11 +606,13 @@ def setup_2fa():
             url_for("dashboard")
         )
 
+
     # --------------------------------------------------------
     # CREATE SECRET
     # --------------------------------------------------------
 
     secret = user["two_fa_secret"]
+
 
     if not secret:
 
@@ -455,6 +635,7 @@ def setup_2fa():
         conn.commit()
         conn.close()
 
+
     # --------------------------------------------------------
     # CREATE TOTP URI
     # --------------------------------------------------------
@@ -465,6 +646,7 @@ def setup_2fa():
         name=user["email"],
         issuer_name="Secure Login System"
     )
+
 
     return render_template(
         "setup_2fa.html",
@@ -481,10 +663,17 @@ def setup_2fa():
 @app.route("/qr-code")
 def qr_code():
 
-    user_id = session.get("user_id")
+    user_id = session.get(
+        "user_id"
+    )
+
 
     if not user_id:
-        user_id = session.get("pending_user_id")
+
+        user_id = session.get(
+            "pending_user_id"
+        )
+
 
     if not user_id:
 
@@ -492,6 +681,7 @@ def qr_code():
             "Unauthorized. Please login first.",
             401
         )
+
 
     conn = get_db()
 
@@ -506,6 +696,7 @@ def qr_code():
 
     conn.close()
 
+
     if not user:
 
         return (
@@ -513,7 +704,9 @@ def qr_code():
             404
         )
 
+
     secret = user["two_fa_secret"]
+
 
     if not secret:
 
@@ -522,8 +715,9 @@ def qr_code():
             404
         )
 
+
     # --------------------------------------------------------
-    # CREATE TOTP URI
+    # TOTP URI
     # --------------------------------------------------------
 
     totp = pyotp.TOTP(secret)
@@ -532,6 +726,7 @@ def qr_code():
         name=user["email"],
         issuer_name="Secure Login System"
     )
+
 
     # --------------------------------------------------------
     # CREATE QR
@@ -545,9 +740,14 @@ def qr_code():
     )
 
     qr.add_data(uri)
-    qr.make(fit=True)
+
+    qr.make(
+        fit=True
+    )
+
 
     image = qr.make_image()
+
 
     # --------------------------------------------------------
     # STORE IMAGE IN MEMORY
@@ -562,6 +762,11 @@ def qr_code():
 
     image_bytes.seek(0)
 
+
+    # --------------------------------------------------------
+    # SEND IMAGE
+    # --------------------------------------------------------
+
     return send_file(
         image_bytes,
         mimetype="image/png",
@@ -573,7 +778,10 @@ def qr_code():
 # ENABLE 2FA
 # ============================================================
 
-@app.route("/enable-2fa", methods=["POST"])
+@app.route(
+    "/enable-2fa",
+    methods=["POST"]
+)
 def enable_2fa():
 
     if "user_id" not in session:
@@ -587,27 +795,38 @@ def enable_2fa():
             url_for("login")
         )
 
+
     user_id = session["user_id"]
+
+
+    # --------------------------------------------------------
+    # GET OTP
+    # --------------------------------------------------------
 
     otp = request.form.get(
         "otp",
         ""
     ).strip()
 
+
     # --------------------------------------------------------
     # OTP FORMAT
     # --------------------------------------------------------
 
-    if not otp.isdigit() or len(otp) != 6:
+    if (
+        not otp.isdigit()
+        or len(otp) != 6
+    ):
 
         flash(
             "Please enter a valid 6-digit authentication code.",
-            "danger"
+            "error"
         )
 
         return redirect(
             url_for("setup_2fa")
         )
+
 
     # --------------------------------------------------------
     # GET USER
@@ -624,20 +843,27 @@ def enable_2fa():
         (user_id,)
     ).fetchone()
 
+
     if not user:
 
         conn.close()
 
         flash(
             "User account not found.",
-            "danger"
+            "error"
         )
 
         return redirect(
             url_for("login")
         )
 
+
+    # --------------------------------------------------------
+    # SECRET
+    # --------------------------------------------------------
+
     secret = user["two_fa_secret"]
+
 
     if not secret:
 
@@ -645,12 +871,13 @@ def enable_2fa():
 
         flash(
             "2FA secret is missing.",
-            "danger"
+            "error"
         )
 
         return redirect(
             url_for("setup_2fa")
         )
+
 
     # --------------------------------------------------------
     # VERIFY OTP
@@ -658,18 +885,32 @@ def enable_2fa():
 
     totp = pyotp.TOTP(secret)
 
-    if not totp.verify(otp):
+
+    try:
+
+        otp_valid = totp.verify(
+            otp,
+            valid_window=1
+        )
+
+    except Exception:
+
+        otp_valid = False
+
+
+    if not otp_valid:
 
         conn.close()
 
         flash(
             "Invalid authentication code. Please try again.",
-            "danger"
+            "error"
         )
 
         return redirect(
             url_for("setup_2fa")
         )
+
 
     # --------------------------------------------------------
     # ENABLE 2FA
@@ -687,14 +928,16 @@ def enable_2fa():
     conn.commit()
     conn.close()
 
+
     # --------------------------------------------------------
-    # SUCCESS MESSAGE
+    # SUCCESS
     # --------------------------------------------------------
 
     flash(
         "Two-factor authentication has been enabled successfully!",
         "success"
     )
+
 
     return redirect(
         url_for("dashboard")
@@ -705,7 +948,10 @@ def enable_2fa():
 # VERIFY 2FA DURING LOGIN
 # ============================================================
 
-@app.route("/verify-2fa", methods=["GET", "POST"])
+@app.route(
+    "/verify-2fa",
+    methods=["GET", "POST"]
+)
 def verify_2fa():
 
     # --------------------------------------------------------
@@ -723,7 +969,13 @@ def verify_2fa():
             url_for("login")
         )
 
+
     user_id = session["pending_user_id"]
+
+
+    # --------------------------------------------------------
+    # GET USER
+    # --------------------------------------------------------
 
     conn = get_db()
 
@@ -738,18 +990,20 @@ def verify_2fa():
 
     conn.close()
 
+
     if not user:
 
         session.clear()
 
         flash(
             "User account not found.",
-            "danger"
+            "error"
         )
 
         return redirect(
             url_for("login")
         )
+
 
     # ========================================================
     # POST
@@ -762,33 +1016,46 @@ def verify_2fa():
             ""
         ).strip()
 
+
         # ----------------------------------------------------
         # OTP FORMAT
         # ----------------------------------------------------
 
-        if not otp.isdigit() or len(otp) != 6:
+        if (
+            not otp.isdigit()
+            or len(otp) != 6
+        ):
 
             flash(
                 "Please enter a valid 6-digit authentication code.",
-                "danger"
+                "error"
             )
 
             return redirect(
                 url_for("verify_2fa")
             )
 
+
+        # ----------------------------------------------------
+        # SECRET
+        # ----------------------------------------------------
+
         secret = user["two_fa_secret"]
+
 
         if not secret:
 
+            session.clear()
+
             flash(
                 "2FA secret is missing.",
-                "danger"
+                "error"
             )
 
             return redirect(
                 url_for("login")
             )
+
 
         # ----------------------------------------------------
         # VERIFY OTP
@@ -796,20 +1063,38 @@ def verify_2fa():
 
         totp = pyotp.TOTP(secret)
 
-        if not totp.verify(otp):
+
+        try:
+
+            otp_valid = totp.verify(
+                otp,
+                valid_window=1
+            )
+
+        except Exception:
+
+            otp_valid = False
+
+
+        # ----------------------------------------------------
+        # INVALID OTP
+        # ----------------------------------------------------
+
+        if not otp_valid:
 
             flash(
                 "Invalid authentication code. Please try again.",
-                "danger"
+                "error"
             )
 
             return redirect(
                 url_for("verify_2fa")
             )
 
-        # ----------------------------------------------------
-        # SUCCESSFUL LOGIN
-        # ----------------------------------------------------
+
+        # ====================================================
+        # SUCCESSFUL 2FA LOGIN
+        # ====================================================
 
         session.clear()
 
@@ -817,14 +1102,17 @@ def verify_2fa():
         session["name"] = user["name"]
         session["email"] = user["email"]
 
+
         flash(
             "Two-factor authentication successful.",
             "success"
         )
 
+
         return redirect(
             url_for("dashboard")
         )
+
 
     # ========================================================
     # GET
@@ -854,7 +1142,9 @@ def dashboard():
             url_for("login")
         )
 
+
     user_id = session["user_id"]
+
 
     conn = get_db()
 
@@ -869,18 +1159,20 @@ def dashboard():
 
     conn.close()
 
+
     if not user:
 
         session.clear()
 
         flash(
             "User account not found.",
-            "danger"
+            "error"
         )
 
         return redirect(
             url_for("login")
         )
+
 
     return render_template(
         "dashboard.html",
@@ -908,45 +1200,91 @@ def logout():
 
 
 # ============================================================
-# ERROR HANDLERS
+# 404
 # ============================================================
 
 @app.errorhandler(404)
 def page_not_found(error):
 
-    # If 404.html exists, show it.
-    # Otherwise return a simple response.
-    try:
+    return """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>404 - Page Not Found</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                text-align: center;
+                padding: 60px;
+                background: #0f172a;
+                color: white;
+            }
 
-        return render_template(
-            "404.html"
-        ), 404
+            a {
+                color: #818cf8;
+                text-decoration: none;
+                font-weight: bold;
+            }
+        </style>
+    </head>
 
-    except Exception:
+    <body>
 
-        return (
-            "404 - Page not found.",
-            404
-        )
+        <h1>404</h1>
 
+        <p>Page not found.</p>
+
+        <a href="/login">
+            Back to Login
+        </a>
+
+    </body>
+    </html>
+    """, 404
+
+
+# ============================================================
+# 500
+# ============================================================
 
 @app.errorhandler(500)
 def internal_server_error(error):
 
-    # If 500.html exists, show it.
-    # Otherwise return a simple response.
-    try:
+    return """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>500 - Server Error</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                text-align: center;
+                padding: 60px;
+                background: #0f172a;
+                color: white;
+            }
 
-        return render_template(
-            "500.html"
-        ), 500
+            a {
+                color: #818cf8;
+                text-decoration: none;
+                font-weight: bold;
+            }
+        </style>
+    </head>
 
-    except Exception:
+    <body>
 
-        return (
-            "500 - Internal server error.",
-            500
-        )
+        <h1>500</h1>
+
+        <p>Something went wrong on the server.</p>
+
+        <a href="/login">
+            Back to Login
+        </a>
+
+    </body>
+    </html>
+    """, 500
 
 
 # ============================================================
@@ -954,8 +1292,6 @@ def internal_server_error(error):
 # ============================================================
 
 if __name__ == "__main__":
-
-    init_db()
 
     print("")
     print("====================================================")
@@ -969,6 +1305,7 @@ if __name__ == "__main__":
     print("====================================================")
     print("")
 
+
     app.run(
         host="0.0.0.0",
         port=int(
@@ -977,5 +1314,5 @@ if __name__ == "__main__":
                 5000
             )
         ),
-        debug=True
+        debug=False
     )

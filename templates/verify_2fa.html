@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
 
     <meta
@@ -14,125 +16,167 @@
         rel="stylesheet"
         href="{{ url_for('static', filename='style.css') }}"
     >
+
 </head>
 
 <body>
 
-    <div class="page-container">
+<div class="page-container">
 
-        <div class="twofa-card">
+    <div class="twofa-card">
 
-            <!-- Lock Icon -->
-            <div class="twofa-icon">
-                🔐
-            </div>
+        <div class="twofa-icon">
+            🔐
+        </div>
 
-            <!-- Heading -->
-            <h1>
-                Verify 2FA
-            </h1>
+        <h1>
+            Verify 2FA
+        </h1>
 
-            <p class="twofa-description">
-                Enter the 6-digit code from your authenticator app.
-            </p>
+        <p class="twofa-description">
+            Enter the 6-digit code from your authenticator app.
+        </p>
 
 
-            <!-- QR CODE SECTION -->
-            <div class="qr-section">
+        <!-- FLASH MESSAGES -->
 
-                <h2>
-                    2FA QR Code
-                </h2>
+        {% with messages = get_flashed_messages(with_categories=true) %}
 
-                <div class="qr-box">
+            {% if messages %}
 
-                    <img
-                        src="{{ url_for('qr_code') }}"
-                        alt="2FA QR Code"
-                        class="qr-image"
-                    >
+                <div class="flash-container">
+
+                    {% for category, message in messages %}
+
+                        <div class="flash {{ category }}">
+                            {{ message }}
+                        </div>
+
+                    {% endfor %}
 
                 </div>
 
-                <p class="qr-instruction">
-                    You can scan this QR code with your
-                    authenticator app.
-                </p>
+            {% endif %}
 
-                <p class="qr-apps">
-                    Google Authenticator • Microsoft Authenticator • Authy
-                </p>
+        {% endwith %}
+
+
+        <!-- QR CODE -->
+
+        <div class="qr-section">
+
+            <h2>
+                Authenticator QR Code
+            </h2>
+
+            <div class="qr-box">
+
+                <img
+                    src="{{ url_for('qr_code') }}"
+                    alt="2FA QR Code"
+                    class="qr-image"
+                >
 
             </div>
 
+            <p class="qr-instruction">
 
-            <!-- DIVIDER -->
-            <div class="divider">
-                <span>ENTER CODE</span>
-            </div>
+                Scan this QR code with your
+                authenticator app.
 
+            </p>
 
-            <!-- OTP FORM -->
-            <form
-                method="POST"
-                action="{{ url_for('verify_2fa') }}"
-                class="otp-form"
-            >
+            <p class="qr-apps">
 
-                <label for="otp">
-                    Authentication Code
-                </label>
+                Google Authenticator •
+                Microsoft Authenticator •
+                Authy
 
-                <input
-                    type="text"
-                    id="otp"
-                    name="otp"
-                    placeholder="000000"
-                    maxlength="6"
-                    minlength="6"
-                    pattern="[0-9]{6}"
-                    inputmode="numeric"
-                    autocomplete="one-time-code"
-                    required
-                >
-
-                <button
-                    type="submit"
-                    class="verify-button"
-                >
-                    🔓 Verify 2FA
-                </button>
-
-            </form>
-
-
-            <!-- BACK TO LOGIN -->
-            <a
-                href="{{ url_for('login') }}"
-                class="back-login"
-            >
-                ← Back to Login
-            </a>
+            </p>
 
         </div>
 
+
+        <!-- DIVIDER -->
+
+        <div class="divider">
+
+            <span>
+                ENTER CODE
+            </span>
+
+        </div>
+
+
+        <!-- OTP FORM -->
+
+        <form
+            method="POST"
+            action="{{ url_for('verify_2fa') }}"
+            class="otp-form"
+        >
+
+            <label for="otp">
+                Authentication Code
+            </label>
+
+            <input
+                type="text"
+                id="otp"
+                name="otp"
+                placeholder="123456"
+                maxlength="6"
+                minlength="6"
+                pattern="[0-9]{6}"
+                inputmode="numeric"
+                autocomplete="one-time-code"
+                required
+            >
+
+            <button
+                type="submit"
+                class="verify-button"
+            >
+                🔓 Verify 2FA
+            </button>
+
+        </form>
+
+
+        <!-- BACK -->
+
+        <a
+            href="{{ url_for('login') }}"
+            class="back-login"
+        >
+            ← Back to Login
+        </a>
+
     </div>
 
+</div>
 
-    <!-- OTP INPUT SCRIPT -->
-    <script>
 
-        const otpInput = document.getElementById("otp");
+<script>
 
-        otpInput.addEventListener("input", function () {
+const otpInput =
+    document.getElementById("otp");
 
-            this.value = this.value
-                .replace(/[^0-9]/g, "")
+
+otpInput.addEventListener(
+    "input",
+    function () {
+
+        this.value =
+            this.value
+                .replace(/\D/g, "")
                 .slice(0, 6);
 
-        });
+    }
+);
 
-    </script>
+</script>
 
 </body>
+
 </html>
