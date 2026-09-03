@@ -30,7 +30,9 @@ app.secret_key = os.environ.get(
     secrets.token_hex(32)
 )
 
-DATABASE = "users.db"
+# Use an absolute path so SQLite works correctly on Render
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATABASE = os.path.join(BASE_DIR, "users.db")
 
 
 # ============================================================
@@ -48,6 +50,7 @@ def get_db():
 # ============================================================
 
 def init_db():
+
     conn = get_db()
 
     conn.execute("""
@@ -65,12 +68,12 @@ def init_db():
     conn.close()
 
 
-# Initialize database when Flask starts
+# Initialize database when application starts
 init_db()
 
 
 # ============================================================
-# HOME PAGE
+# HOME
 # ============================================================
 
 @app.route("/")
@@ -91,13 +94,28 @@ def register():
 
     if request.method == "POST":
 
-        name = request.form.get("name", "").strip()
-        email = request.form.get("email", "").strip().lower()
-        password = request.form.get("password", "")
-        confirm_password = request.form.get("confirm_password", "")
+        name = request.form.get(
+            "name",
+            ""
+        ).strip()
+
+        email = request.form.get(
+            "email",
+            ""
+        ).strip().lower()
+
+        password = request.form.get(
+            "password",
+            ""
+        )
+
+        confirm_password = request.form.get(
+            "confirm_password",
+            ""
+        )
 
         # ----------------------------------------------------
-        # CHECK EMPTY FIELDS
+        # REQUIRED FIELDS
         # ----------------------------------------------------
 
         if not name or not email or not password:
@@ -110,7 +128,7 @@ def register():
             return redirect(url_for("register"))
 
         # ----------------------------------------------------
-        # VALIDATE EMAIL
+        # EMAIL VALIDATION
         # ----------------------------------------------------
 
         email_pattern = r"^[^@\s]+@[^@\s]+\.[^@\s]+$"
@@ -125,7 +143,7 @@ def register():
             return redirect(url_for("register"))
 
         # ----------------------------------------------------
-        # CHECK PASSWORD CONFIRMATION
+        # PASSWORD CONFIRMATION
         # ----------------------------------------------------
 
         if password != confirm_password:
@@ -151,7 +169,7 @@ def register():
             return redirect(url_for("register"))
 
         # ----------------------------------------------------
-        # DATABASE
+        # CHECK EXISTING USER
         # ----------------------------------------------------
 
         conn = get_db()
@@ -177,7 +195,7 @@ def register():
             return redirect(url_for("register"))
 
         # ----------------------------------------------------
-        # HASH PASSWORD USING BCRYPT
+        # HASH PASSWORD
         # ----------------------------------------------------
 
         password_hash = bcrypt.hashpw(
@@ -186,7 +204,7 @@ def register():
         ).decode("utf-8")
 
         # ----------------------------------------------------
-        # INSERT USER
+        # CREATE USER
         # ----------------------------------------------------
 
         conn.execute(
@@ -243,7 +261,7 @@ def login():
         )
 
         # ----------------------------------------------------
-        # EMPTY EMAIL OR PASSWORD
+        # EMPTY FIELDS
         # ----------------------------------------------------
 
         if not email or not password:
@@ -273,13 +291,11 @@ def login():
         conn.close()
 
         # ----------------------------------------------------
-        # USER DOES NOT EXIST
+        # USER NOT FOUND
         # ----------------------------------------------------
 
         if not user:
 
-            # IMPORTANT:
-            # This uses "error" so CSS displays it in RED.
             flash(
                 "Invalid email or password.",
                 "error"
@@ -288,7 +304,7 @@ def login():
             return redirect(url_for("login"))
 
         # ----------------------------------------------------
-        # CHECK BCRYPT PASSWORD
+        # CHECK PASSWORD
         # ----------------------------------------------------
 
         try:
@@ -308,8 +324,6 @@ def login():
 
         if not password_correct:
 
-            # IMPORTANT:
-            # This uses "error" so CSS displays it in RED.
             flash(
                 "Invalid email or password.",
                 "error"
@@ -323,29 +337,16 @@ def login():
 
         if user["two_fa_enabled"] == 1:
 
+            session.clear()
+
             session["pending_user_id"] = user["id"]
-
-            session.pop(
-                "user_id",
-                None
-            )
-
-            session.pop(
-                "name",
-                None
-            )
-
-            session.pop(
-                "email",
-                None
-            )
 
             return redirect(
                 url_for("verify_2fa")
             )
 
         # ====================================================
-        # NORMAL LOGIN WITHOUT 2FA
+        # NORMAL LOGIN
         # ====================================================
 
         session.clear()
@@ -413,7 +414,7 @@ def setup_2fa():
         )
 
     # --------------------------------------------------------
-    # IF 2FA IS ALREADY ENABLED
+    # ALREADY ENABLED
     # --------------------------------------------------------
 
     if user["two_fa_enabled"] == 1:
@@ -428,7 +429,7 @@ def setup_2fa():
         )
 
     # --------------------------------------------------------
-    # CREATE SECRET IF NEEDED
+    # CREATE SECRET
     # --------------------------------------------------------
 
     secret = user["two_fa_secret"]
@@ -455,7 +456,7 @@ def setup_2fa():
         conn.close()
 
     # --------------------------------------------------------
-    # CREATE TOTP PROVISIONING URI
+    # CREATE TOTP URI
     # --------------------------------------------------------
 
     totp = pyotp.TOTP(secret)
@@ -533,7 +534,7 @@ def qr_code():
     )
 
     # --------------------------------------------------------
-    # CREATE QR CODE
+    # CREATE QR
     # --------------------------------------------------------
 
     qr = qrcode.QRCode(
@@ -594,7 +595,7 @@ def enable_2fa():
     ).strip()
 
     # --------------------------------------------------------
-    # VALIDATE OTP FORMAT
+    # OTP FORMAT
     # --------------------------------------------------------
 
     if not otp.isdigit() or len(otp) != 6:
@@ -607,6 +608,10 @@ def enable_2fa():
         return redirect(
             url_for("setup_2fa")
         )
+
+    # --------------------------------------------------------
+    # GET USER
+    # --------------------------------------------------------
 
     conn = get_db()
 
@@ -682,6 +687,10 @@ def enable_2fa():
     conn.commit()
     conn.close()
 
+    # --------------------------------------------------------
+    # SUCCESS MESSAGE
+    # --------------------------------------------------------
+
     flash(
         "Two-factor authentication has been enabled successfully!",
         "success"
@@ -700,7 +709,7 @@ def enable_2fa():
 def verify_2fa():
 
     # --------------------------------------------------------
-    # CHECK PENDING USER
+    # CHECK PENDING LOGIN
     # --------------------------------------------------------
 
     if "pending_user_id" not in session:
@@ -743,7 +752,7 @@ def verify_2fa():
         )
 
     # ========================================================
-    # POST = VERIFY OTP
+    # POST
     # ========================================================
 
     if request.method == "POST":
@@ -754,7 +763,7 @@ def verify_2fa():
         ).strip()
 
         # ----------------------------------------------------
-        # CHECK OTP FORMAT
+        # OTP FORMAT
         # ----------------------------------------------------
 
         if not otp.isdigit() or len(otp) != 6:
@@ -798,9 +807,9 @@ def verify_2fa():
                 url_for("verify_2fa")
             )
 
-        # ====================================================
-        # OTP SUCCESS
-        # ====================================================
+        # ----------------------------------------------------
+        # SUCCESSFUL LOGIN
+        # ----------------------------------------------------
 
         session.clear()
 
@@ -818,7 +827,7 @@ def verify_2fa():
         )
 
     # ========================================================
-    # GET = SHOW VERIFY PAGE
+    # GET
     # ========================================================
 
     return render_template(
@@ -905,17 +914,39 @@ def logout():
 @app.errorhandler(404)
 def page_not_found(error):
 
-    return render_template(
-        "404.html"
-    ), 404
+    # If 404.html exists, show it.
+    # Otherwise return a simple response.
+    try:
+
+        return render_template(
+            "404.html"
+        ), 404
+
+    except Exception:
+
+        return (
+            "404 - Page not found.",
+            404
+        )
 
 
 @app.errorhandler(500)
 def internal_server_error(error):
 
-    return render_template(
-        "500.html"
-    ), 500
+    # If 500.html exists, show it.
+    # Otherwise return a simple response.
+    try:
+
+        return render_template(
+            "500.html"
+        ), 500
+
+    except Exception:
+
+        return (
+            "500 - Internal server error.",
+            500
+        )
 
 
 # ============================================================
@@ -940,6 +971,11 @@ if __name__ == "__main__":
 
     app.run(
         host="0.0.0.0",
-        port=int(os.environ.get("PORT", 5000)),
+        port=int(
+            os.environ.get(
+                "PORT",
+                5000
+            )
+        ),
         debug=True
     )

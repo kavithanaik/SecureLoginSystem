@@ -8,48 +8,76 @@
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0">
 
-    <title>Dashboard</title>
+    <title>Dashboard - Secure Login System</title>
 
     <link rel="stylesheet"
           href="{{ url_for('static', filename='style.css') }}">
 
 </head>
 
+
 <body>
+
 
 <div class="dashboard-container">
 
     <div class="dashboard-card">
 
+
+        <!-- ==================================================
+             HEADER
+        ================================================== -->
+
         <h1>
             Welcome, {{ user["name"] }}
         </h1>
+
 
         <p class="dashboard-subtitle">
             You are securely logged in to your account.
         </p>
 
 
+        <!-- ==================================================
+             FLASH MESSAGES
+        ================================================== -->
+
         {% with messages = get_flashed_messages(with_categories=true) %}
 
-            {% for category, message in messages %}
+            {% if messages %}
 
-                <div class="message {{ category }}">
-                    {{ message }}
+                <div class="flash-container">
+
+                    {% for category, message in messages %}
+
+                        <div class="flash {{ category }}">
+                            {{ message }}
+                        </div>
+
+                    {% endfor %}
+
                 </div>
 
-            {% endfor %}
+            {% endif %}
 
         {% endwith %}
 
 
+        <!-- ==================================================
+             ACCOUNT INFORMATION
+        ================================================== -->
+
         <div class="account-box">
+
+
+            <!-- 2FA STATUS -->
 
             <p class="twofa-status">
 
                 <strong>
                     Two-Factor Authentication:
                 </strong>
+
 
                 {% if user["two_fa_enabled"] %}
 
@@ -59,7 +87,7 @@
 
                 {% else %}
 
-                    <span>
+                    <span class="available">
                         Available
                     </span>
 
@@ -94,19 +122,27 @@
 
             </p>
 
+
         </div>
 
 
+        <!-- ==================================================
+             2FA SETUP
+        ================================================== -->
+
         {% if not user["two_fa_enabled"] %}
+
 
             <a
                 href="{{ url_for('setup_2fa') }}"
-                class="primary-btn button-link"
+                class="primary-btn button-link setup-2fa-button"
             >
                 Setup Two-Factor Authentication
             </a>
 
+
         {% else %}
+
 
             <div class="twofa-enabled-box">
 
@@ -114,22 +150,30 @@
 
             </div>
 
+
         {% endif %}
 
 
-        <br>
+        <!-- ==================================================
+             LOGOUT
+        ================================================== -->
 
+        <div class="dashboard-actions">
 
-        <a
-            href="{{ url_for('logout') }}"
-            class="logout-btn"
-        >
-            Logout
-        </a>
+            <a
+                href="{{ url_for('logout') }}"
+                class="logout-btn"
+            >
+                Logout
+            </a>
+
+        </div>
+
 
     </div>
 
 </div>
+
 
 </body>
 </html>
